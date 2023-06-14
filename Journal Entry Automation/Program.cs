@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using System.Runtime.ConstrainedExecution;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -110,6 +111,12 @@ struct Line
                 Math.Round(amountFloat, 2);
                 LineContent.amount = amountFloat.ToString();
                 LineContent.desc = lineVals[15];
+
+                Entry Entry;
+                Entry.Head = Head;
+                Entry.Line = LineContent;
+
+                printFile(sw, Entry);
                 }
 
                 //Close the file
@@ -141,6 +148,14 @@ struct Line
         dictionary.Add("CC_ACT_ENC", "CC_AGY_CTL");
         dictionary.Add("CC_CSH_EXP", "CC_CASH");
         dictionary.Add("CC_GR1_ENC", "CC_GRNT1");
+    }
+
+    static void printFile(StreamWriter sw, Entry Entry)
+    {
+        sw.WriteLine("<JRNL_HDR_IMP>");
+        sw.WriteLine("  <SEQNO>NEED THIS NUM</SEQNO>");
+        sw.WriteLine("  " + Entry.Head.journalID);
+        sw.WriteLine("  " + Entry.Head.journalDate);
     }
 
 
