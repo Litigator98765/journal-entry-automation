@@ -12,7 +12,7 @@ struct Entry
 struct Header
 {
     public int seqNum;
-    public const string unit = "STATE"
+    public const string unit = "STATE";
     public string journalID;
     public string journalDate;
     public string desc;
@@ -55,6 +55,9 @@ struct Line
         [STAThread]
         static void Main(string[] args)
         {
+
+        Dictionary<string, string> ledgerGroups = new Dictionary<string, string>();
+        buildDictionary(ledgerGroups);
             try
             {
                 StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST_OUT.txt");
@@ -84,11 +87,11 @@ struct Line
                     string[] lineVals = line.Split();
 
                 //Get all line values
-                //TODO: there has to be a better way to do this
-
+                //TODO: there has to be a better way to do 
                 Line LineContent;
                 LineContent.unit = lineVals[0];
                 Head.ledger = lineVals[1];
+                Head.ledgerGroup = ledgerGroups[lineVals[1]];
                 LineContent.ledger = lineVals[1];
                 LineContent.account = lineVals[2];
                 LineContent.fund = lineVals[3];
@@ -102,15 +105,12 @@ struct Line
                 LineContent.agency = lineVals[11];
                 LineContent.ISTVXRef = lineVals[12];
                 LineContent.budRef = lineVals[13];
-                LineContent.amount = lineVals[14];
+                //Round amount to two decimal places
+                float amountFloat = Int32.Parse(lineVals[14]);
+                Math.Round(amountFloat, 2);
+                LineContent.amount = amountFloat.ToString();
                 LineContent.desc = lineVals[15];
-
                 }
-
-
-
-
-
 
                 //Close the file
                 sw.Close();
@@ -131,6 +131,17 @@ struct Line
         {
             
         }
+
+    static void buildDictionary(Dictionary<string, string> dictionary)
+    {
+        dictionary.Add("CC_APR_ENC", "CC_APPROP");
+        dictionary.Add("CC_ALT_ENC", "CC_ALLOT");
+        dictionary.Add("CC_PLN_ENC", "CC_PLAN");
+        dictionary.Add("CC_DET_ENC", "CC_DETAIL");
+        dictionary.Add("CC_ACT_ENC", "CC_AGY_CTL");
+        dictionary.Add("CC_CSH_EXP", "CC_CASH");
+        dictionary.Add("CC_GR1_ENC", "CC_GRNT1");
+    }
 
 
     }
