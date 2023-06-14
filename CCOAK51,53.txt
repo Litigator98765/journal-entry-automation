@@ -1,0 +1,5 @@
+Journal Entries															
+Journal ID:	CCOAK11606														
+Journal Date:	10/31/2022		Fund GRF; post adjustments to commitment control encumbrance ledgers for JFS01_0000029366/00286718												
+Unit	Ledger	Account	Fund	ALI	Dept	Program	Grant/Prj	Project	Serv Loc	Reporting	Agency Use	ISTV Xref	Bud Ref	Amount	Descr
+STATE	CC_APR_ENC	527751	GRF	600450	JFS150002	7601B	JFSFPOOL			JFS00206I0		OBM	JFSOTHER	274.314	JFS01_0000029366/00286718
