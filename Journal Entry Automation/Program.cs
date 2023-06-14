@@ -1,25 +1,117 @@
-﻿//Write a text file - Version-1
 using System;
 using System.IO;
-namespace readwriteapp
+using System.Runtime.ConstrainedExecution;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+struct Entry
 {
-    class Class1
-    {
-        String outFileSting = "C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\TEST.txt";
+    struct Header;
+    struct Line;
+};
+
+struct Header
+{
+    public int seqNum;
+    public const string unit = "STATE"
+    public string journalID;
+    public string journalDate;
+    public string desc;
+    public string ledgerGroup;
+    public string ledger;
+    public const string source = "SPJ";
+    public const string user = "CURRENT_USER";
+    public DateTime date;
+    public const string reversal = "N";
+    public const string autoGenLines = "N";
+    public const string adjustEntry = "N";
+};
+
+struct Line
+{
+    int journalLine;
+    public string unit;
+    public string ledger;
+    public string account;
+    public string fund;
+    public string ALI;
+    public string dept;
+    public string prog;
+    public string grtPrj;
+    public string proj;
+    public string servLoc;
+    public string reporting;
+    public string agency;
+    public string ISTVXRef;
+    public string budRef;
+    public string amount;
+    public string desc;
+};
+
+
+    class journalEntries { 
+    
+
+        const string outFileSting = "C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\TEST.txt";
         [STAThread]
         static void Main(string[] args)
         {
             try
             {
-                //Pass the filepath and filename to the StreamWriter Constructor
-                //Console.Write("Enter the journal file name to be read");
-                //String fileName = Console.ReadLine();
-                //Console.Write("Enter name of the file to be generated");
-                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\TEST.txt");
-                //Write a line of text
-                sw.WriteLine("Hello World!!");
-                //Write a second line of text
-                sw.WriteLine("From the StreamWriter class");
+                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST_OUT.txt");
+                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST.txt");
+
+                //Discards first Journal Entires Line
+                sr.ReadLine();
+                using (sr)
+                {
+                    Header Head;
+                    //Read first line and trim all information except for Journal ID
+                    string journalID = sr.ReadLine();
+                    journalID = journalID[12..];
+                    Head.journalID = journalID;
+
+                    //Read second line and trim all information except for Journal Date/Desc
+                    string journalDateAndDesc = sr.ReadLine();
+                    string journalDate = journalDateAndDesc.Substring(14, 10);
+                    string journalDesc = journalDateAndDesc[26..];
+                    Head.journalDate = journalDate;
+                    Head.desc = journalDesc;
+
+                    //Discard header titles
+                    sr.ReadLine();
+
+                    string line = sr.ReadLine();
+                    string[] lineVals = line.Split();
+
+                //Get all line values
+                //TODO: there has to be a better way to do this
+
+                Line LineContent;
+                LineContent.unit = lineVals[0];
+                Head.ledger = lineVals[1];
+                LineContent.ledger = lineVals[1];
+                LineContent.account = lineVals[2];
+                LineContent.fund = lineVals[3];
+                LineContent.ALI = lineVals[4];
+                LineContent.dept = lineVals[5];
+                LineContent.prog = lineVals[6];
+                LineContent.grtPrj = lineVals[7];
+                LineContent.proj = lineVals[8];
+                LineContent.servLoc = lineVals[9];
+                LineContent.reporting = lineVals[10];
+                LineContent.agency = lineVals[11];
+                LineContent.ISTVXRef = lineVals[12];
+                LineContent.budRef = lineVals[13];
+                LineContent.amount = lineVals[14];
+                LineContent.desc = lineVals[15];
+
+                }
+
+
+
+
+
+
                 //Close the file
                 sw.Close();
 
@@ -42,4 +134,3 @@ namespace readwriteapp
 
 
     }
-}
