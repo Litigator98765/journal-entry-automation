@@ -54,7 +54,7 @@ namespace Journal_Entry_Automation
     };
 
 
-    class journalEntries
+    class JournalEntries
     {
 
 
@@ -75,18 +75,22 @@ namespace Journal_Entry_Automation
                 using (sr)
                 {
 
-                    Entry Entry;
+                    Entry Entry = new Entry();
 
                     //Read first line and trim all information except for Journal ID
                     string journalID = sr.ReadLine();
                     journalID = journalID[12..];
+                    journalID = journalID.Trim();
                     Entry.Head.journalID = journalID;
 
                     //Read second line and trim all information except for Journal Date/Desc
                     string journalDateAndDesc = sr.ReadLine();
                     string journalDate = journalDateAndDesc.Substring(14, 10);
                     string journalDesc = journalDateAndDesc[26..];
+                    //Remove all /
+                    journalDate = journalDate.Replace("/", "");
                     Entry.Head.journalDate = journalDate;
+                    Console.WriteLine(journalDate);
                     Entry.Head.desc = journalDesc;
 
                     //Discard header titles
@@ -114,15 +118,12 @@ namespace Journal_Entry_Automation
                     Entry.Line.ISTVXRef = lineVals[12];
                     Entry.Line.budRef = lineVals[13];
                     //Round amount to two decimal places
-                    float amountFloat = int.Parse(lineVals[14]);
+                    float amountFloat = float.Parse(lineVals[14]);
                     Math.Round(amountFloat, 2);
                     Entry.Line.amount = amountFloat.ToString();
                     Entry.Line.desc = lineVals[15];
 
-                    //Entry.Head = Head;
-                    //Entry.Line = LineContent;
-
-                    //printFile(sw, Entry);
+                    printFile(sw, Entry);
                 }
 
                 //Close the file
@@ -139,12 +140,6 @@ namespace Journal_Entry_Automation
             }
         }
 
-
-        static void printFile(StreamWriter sw, StreamReader sr)
-        {
-
-        }
-
         static void buildDictionary(Dictionary<string, string> dictionary)
         {
             dictionary.Add("CC_APR_ENC", "CC_APPROP");
@@ -158,10 +153,17 @@ namespace Journal_Entry_Automation
 
         static void printFile(StreamWriter sw, Entry Entry)
         {
+            string unit = Entry.Head.unit;
             sw.WriteLine("<JRNL_HDR_IMP>");
             sw.WriteLine("  <SEQNO>NEED THIS NUM</SEQNO>");
-            sw.WriteLine("  " + Entry.Head.journalID);
-            sw.WriteLine("  " + Entry.Head.journalDate);
+            sw.WriteLine("  <BUSINESS_UNIT>" + Entry.Head.unit + "</BUSINESS_UNIT");
+            sw.WriteLine("  <JOURNAL_ID>" + Entry.Head.journalID + "</JOURNAL_ID>");
+            sw.WriteLine("  <JOURNAL_DATE>" + Entry.Head.journalDate + "</JOURNAL_DATE>");
+            sw.WriteLine("  <DESCR254>" + Entry.Head.desc + "</DESC254>");
+            sw.WriteLine("  <LEDGER_GROUP>" + Entry.Head.ledgerGroup + "</LEDGER_GROUP");
+            sw.WriteLine("  <LEDGER>" + Entry.Head.ledger + "</LEDGER >");
+            sw.WriteLine("  <SOURCE>" + Entry.Header.source + "");
+
         }
 
 
