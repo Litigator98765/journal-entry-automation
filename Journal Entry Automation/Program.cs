@@ -1,10 +1,11 @@
-using System;
+sing System;
 using System.IO;
 using System.Reflection.PortableExecutable;
 using System.Runtime.ConstrainedExecution;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
 using System.Linq;
+using System.Transactions;
 
 namespace Journal_Entry_Automation
 {
@@ -20,7 +21,7 @@ namespace Journal_Entry_Automation
         public string ledger;
         public const string source = "SPJ";
         public const string user = "CURRENT_USER";
-        public DateTime date;
+        public string date;
         public const string reversal = "N";
         public const string autoGenLines = "N";
         public const string adjustEntry = "N";
@@ -153,17 +154,70 @@ namespace Journal_Entry_Automation
 
         static void printFile(StreamWriter sw, Entry Entry)
         {
-            string unit = Entry.Head.unit;
+            //HEADER
             sw.WriteLine("<JRNL_HDR_IMP>");
-            sw.WriteLine("  <SEQNO>NEED THIS NUM</SEQNO>");
-            sw.WriteLine("  <BUSINESS_UNIT>" + Entry.Head.unit + "</BUSINESS_UNIT");
+            sw.WriteLine("  <SEQNO>1715</SEQNO>");
+            sw.WriteLine("  <BUSINESS_UNIT>STATE</BUSINESS_UNIT");
             sw.WriteLine("  <JOURNAL_ID>" + Entry.Head.journalID + "</JOURNAL_ID>");
             sw.WriteLine("  <JOURNAL_DATE>" + Entry.Head.journalDate + "</JOURNAL_DATE>");
             sw.WriteLine("  <DESCR254>" + Entry.Head.desc + "</DESC254>");
             sw.WriteLine("  <LEDGER_GROUP>" + Entry.Head.ledgerGroup + "</LEDGER_GROUP");
             sw.WriteLine("  <LEDGER>" + Entry.Head.ledger + "</LEDGER >");
-            sw.WriteLine("  <SOURCE>" + Entry.Header.source + "");
+            sw.WriteLine("  <SOURCE>SPJ</SOURCE");
+            sw.WriteLine("  <OPRID>CURRENT_USER</OPRID>");
+            Entry.Head.date = DateTime.Now.ToString("yyyyMMdd");
+            sw.WriteLine("  <CUR_EFFDT>" + Entry.Head.date + "</CUR_EFFDT>");
+            sw.WriteLine("  <REVERSAL_CD>N</REVERSAL_CD>");
+            sw.WriteLine("  <AUTO_GEN_LINES>N</AUTO_GEN_LINES>");
+            sw.WriteLine("  <ADJUSTING_ENTRY>N</ADJUSTING_ENTRY>");
+            //LINE
+            sw.WriteLine("  <JRNL_LN_IMP>");
+            sw.WriteLine("    <JOURNAL_LINE>1</JOURNAL_LINE>");
+            sw.WriteLine("    <BUSINESS_UNIT>STATE</BUSINESS_UNIT>");
+            sw.WriteLine("    <LEDGER>" + Entry.Line.ledger + "</LEDGER");
+            sw.WriteLine("    <ACCOUNT>" + Entry.Line.account + "</ACCOUNT>");
+            sw.WriteLine("    <FUND_CODE>" + Entry.Line.fund + "</FUNDCODE>");
+            sw.WriteLine("    <PRODUCT>" + Entry.Line.ALI + "</PRODUCT>");
+            sw.WriteLine("    <DEPTID>" + Entry.Line.dept + "</DEPTID>");
+            sw.WriteLine("    <PROGRAM_CODE>" + Entry.Line.prog + "</PROGRAM_CODE>");
 
+            if (Entry.Line.grtPrj != "")
+            {
+                sw.WriteLine("    <PROJECT_ID>" + Entry.Line.grtPrj + "</PROJECT_ID>");
+            }
+
+            if (Entry.Line.proj != "")
+            {
+                sw.WriteLine("    <CHARTFIELD1>" + Entry.Line.proj + "</CHARTFIELD1>");
+            }
+
+            if (Entry.Line.servLoc != "")
+            {
+                sw.WriteLine("    <CLASS_FLD>" + Entry.Line.servLoc + "</CLASS_FLD>");
+            }
+
+            if (Entry.Line.reporting != "")
+            {
+                sw.WriteLine("    <CHARTFIELD2>" + Entry.Line.reporting + "</CHARTFIELD2>");
+            }
+
+            if (Entry.Line.agency != "")
+            {
+                sw.WriteLine("    <CHARTFIELD3>" + Entry.Line.agency + "</CHARTFIELD3>");
+            }
+
+            if (Entry.Line.ISTVXRef != "")
+            {
+                sw.WriteLine("    <OPERATING_UNIT>" + Entry.Line.ISTVXRef + "</OPERATING_UNIT>");
+            }
+
+            if (Entry.Line.budRef != "")
+            {
+                sw.WriteLine("    <BUDGET_REF>" + Entry.Line.budRef + "</BUDGET_REF>");
+            }
+            
+            sw.WriteLine("    <FORIEGN_AMOUNT>" + Entry.Line.amount + "</FOREIGN_AMOUNT>");
+            sw.WriteLine("    <LINE_DESCR>" + Entry.Line.desc + "</LINE_DESCR>");
         }
 
 
