@@ -59,82 +59,25 @@ namespace Journal_Entry_Automation
 
     class JournalEntries
     {
-
-
         const string outFileSting = "C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\TEST.txt";
-        [STAThread]
         static void Main(string[] args)
         {
-
-            Dictionary<string, string> ledgerGroups = new Dictionary<string, string>();
-            buildDictionary(ledgerGroups);
             try
             {
                 StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST_OUT.txt");
                 StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST.txt");
 
-                //Discards first Journal Entires Line
-                sr.ReadLine();
-                using (sr)
+                Entry Entry = new Entry();
+
+                while (sr.Peek() != -1)
                 {
-
-                    Entry Entry = new Entry();
-
-                    //Read first line and trim all information except for Journal ID
-                    string journalID = sr.ReadLine();
-                    journalID = journalID[12..];
-                    journalID = journalID.Trim();
-                    Entry.Head.journalID = journalID;
-
-                    //Read second line and trim all information except for Journal Date/Desc
-                    string journalDateAndDesc = sr.ReadLine();
-                    string journalDate = journalDateAndDesc.Substring(14, 10);
-                    journalDate = DateTime.ParseExact(journalDate, "MM/dd/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
-                    string journalDesc = journalDateAndDesc[26..];
-                    Entry.Head.journalDate = journalDate;
-                    Console.WriteLine(journalDate);
-                    journalDesc = journalDesc.Trim();
-                    //URL Encoding to conform to excel
-                    journalDesc = Uri.EscapeDataString(journalDesc);
-                    Entry.Head.desc = journalDesc;
-
-                    //Discard header titles
-                    sr.ReadLine();
-
-                    string line = sr.ReadLine();
-                    string[] lineVals = line.Split();
-
-                    //Get all line values
-                    //TODO: there has to be a better way to do 
-                    Entry.Line.unit = lineVals[0];
-                    Entry.Head.ledger = lineVals[1];
-                    Entry.Head.ledgerGroup = ledgerGroups[lineVals[1]];
-                    Entry.Line.ledger = lineVals[1];
-                    Entry.Line.account = lineVals[2];
-                    Entry.Line.fund = lineVals[3];
-                    Entry.Line.ALI = lineVals[4];
-                    Entry.Line.dept = lineVals[5];
-                    Entry.Line.prog = lineVals[6];
-                    Entry.Line.grtPrj = lineVals[7];
-                    Entry.Line.proj = lineVals[8];
-                    Entry.Line.servLoc = lineVals[9];
-                    Entry.Line.reporting = lineVals[10];
-                    Entry.Line.agency = lineVals[11];
-                    Entry.Line.ISTVXRef = lineVals[12];
-                    Entry.Line.budRef = lineVals[13];
-                    //Round amount to two decimal places
-                    double amountFloat = float.Parse(lineVals[14]);
-                    amountFloat = Math.Round(amountFloat, 2);
-                    Entry.Line.amount = amountFloat.ToString();
-                    Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
-
+                    parseInformation(sr, ref Entry);
                     printFile(sw, Entry);
                 }
 
                 //Close the file
                 sw.Close();
                 sr.Close();
-
             }
             catch (Exception e)
             {
@@ -142,7 +85,7 @@ namespace Journal_Entry_Automation
             }
             finally
             {
-                Console.WriteLine("Executing finally block.");
+                Console.WriteLine("Exiting program");
             }
         }
 
@@ -155,6 +98,65 @@ namespace Journal_Entry_Automation
             dictionary.Add("CC_ACT_ENC", "CC_AGY_CTL");
             dictionary.Add("CC_CSH_EXP", "CC_CASH");
             dictionary.Add("CC_GR1_ENC", "CC_GRNT1");
+        }
+
+        static void parseInformation(StreamReader sr, ref Entry Entry)
+        {
+            Dictionary<string, string> ledgerGroups = new Dictionary<string, string>();
+            buildDictionary(ledgerGroups);
+
+            //Discards first Journal Entires Line
+            sr.ReadLine();
+
+            //Read first line and trim all information except for Journal ID
+            string journalID = sr.ReadLine();
+            journalID = journalID[12..];
+            journalID = journalID.Trim();
+            Entry.Head.journalID = journalID;
+
+            //Read second line and trim all information except for Journal Date/Desc
+            string journalDateAndDesc = sr.ReadLine();
+            string journalDate = journalDateAndDesc.Substring(14, 10);
+            journalDate = DateTime.ParseExact(journalDate, "MM/dd/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
+            string journalDesc = journalDateAndDesc[26..];
+            Entry.Head.journalDate = journalDate;
+            journalDesc = journalDesc.Trim();
+            //URL Encoding to conform to excel
+            journalDesc = Uri.EscapeDataString(journalDesc);
+            Entry.Head.desc = journalDesc;
+
+            //Discard header titles
+            sr.ReadLine();
+
+            string line = sr.ReadLine();
+            string[] lineVals = line.Split();
+
+            //Get all line values
+            //TODO: there has to be a better way to do 
+            Entry.Line.unit = lineVals[0];
+            Entry.Head.ledger = lineVals[1];
+            Entry.Head.ledgerGroup = ledgerGroups[lineVals[1]];
+            Entry.Line.ledger = lineVals[1];
+            Entry.Line.account = lineVals[2];
+            Entry.Line.fund = lineVals[3];
+            Entry.Line.ALI = lineVals[4];
+            Entry.Line.dept = lineVals[5];
+            Entry.Line.prog = lineVals[6];
+            Entry.Line.grtPrj = lineVals[7];
+            Entry.Line.proj = lineVals[8];
+            Entry.Line.servLoc = lineVals[9];
+            Entry.Line.reporting = lineVals[10];
+            Entry.Line.agency = lineVals[11];
+            Entry.Line.ISTVXRef = lineVals[12];
+            Entry.Line.budRef = lineVals[13];
+            //Round amount to two decimal places
+            double amountFloat = float.Parse(lineVals[14]);
+            amountFloat = Math.Round(amountFloat, 2);
+            Entry.Line.amount = amountFloat.ToString();
+            Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
+
+            //Consume whitespace line before next entry
+            sr.ReadLine();
         }
 
         static void printFile(StreamWriter sw, Entry Entry)
