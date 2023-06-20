@@ -1,4 +1,4 @@
-sing System;
+using System;
 using System.IO;
 using System.Reflection.PortableExecutable;
 using System.Runtime.ConstrainedExecution;
@@ -6,6 +6,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
 using System.Linq;
 using System.Transactions;
+using System.Security.Cryptography.X509Certificates;
+using System.Globalization;
 
 namespace Journal_Entry_Automation
 {
@@ -87,11 +89,13 @@ namespace Journal_Entry_Automation
                     //Read second line and trim all information except for Journal Date/Desc
                     string journalDateAndDesc = sr.ReadLine();
                     string journalDate = journalDateAndDesc.Substring(14, 10);
+                    journalDate = DateTime.ParseExact(journalDate, "MM/dd/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
                     string journalDesc = journalDateAndDesc[26..];
-                    //Remove all /
-                    journalDate = journalDate.Replace("/", "");
                     Entry.Head.journalDate = journalDate;
                     Console.WriteLine(journalDate);
+                    journalDesc = journalDesc.Trim();
+                    //URL Encoding to conform to excel
+                    journalDesc = Uri.EscapeDataString(journalDesc);
                     Entry.Head.desc = journalDesc;
 
                     //Discard header titles
@@ -119,16 +123,17 @@ namespace Journal_Entry_Automation
                     Entry.Line.ISTVXRef = lineVals[12];
                     Entry.Line.budRef = lineVals[13];
                     //Round amount to two decimal places
-                    float amountFloat = float.Parse(lineVals[14]);
-                    Math.Round(amountFloat, 2);
+                    double amountFloat = float.Parse(lineVals[14]);
+                    amountFloat = Math.Round(amountFloat, 2);
                     Entry.Line.amount = amountFloat.ToString();
-                    Entry.Line.desc = lineVals[15];
+                    Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
 
                     printFile(sw, Entry);
                 }
 
                 //Close the file
                 sw.Close();
+                sr.Close();
 
             }
             catch (Exception e)
@@ -157,13 +162,13 @@ namespace Journal_Entry_Automation
             //HEADER
             sw.WriteLine("<JRNL_HDR_IMP>");
             sw.WriteLine("  <SEQNO>1715</SEQNO>");
-            sw.WriteLine("  <BUSINESS_UNIT>STATE</BUSINESS_UNIT");
+            sw.WriteLine("  <BUSINESS_UNIT>STATE</BUSINESS_UNIT>");
             sw.WriteLine("  <JOURNAL_ID>" + Entry.Head.journalID + "</JOURNAL_ID>");
             sw.WriteLine("  <JOURNAL_DATE>" + Entry.Head.journalDate + "</JOURNAL_DATE>");
-            sw.WriteLine("  <DESCR254>" + Entry.Head.desc + "</DESC254>");
-            sw.WriteLine("  <LEDGER_GROUP>" + Entry.Head.ledgerGroup + "</LEDGER_GROUP");
-            sw.WriteLine("  <LEDGER>" + Entry.Head.ledger + "</LEDGER >");
-            sw.WriteLine("  <SOURCE>SPJ</SOURCE");
+            sw.WriteLine("  <DESCR254>" + Entry.Head.desc + "</DESCR254>");
+            sw.WriteLine("  <LEDGER_GROUP>" + Entry.Head.ledgerGroup + "</LEDGER_GROUP>");
+            sw.WriteLine("  <LEDGER>" + Entry.Head.ledger + "</LEDGER>");
+            sw.WriteLine("  <SOURCE>SPJ</SOURCE>");
             sw.WriteLine("  <OPRID>CURRENT_USER</OPRID>");
             Entry.Head.date = DateTime.Now.ToString("yyyyMMdd");
             sw.WriteLine("  <CUR_EFFDT>" + Entry.Head.date + "</CUR_EFFDT>");
@@ -174,9 +179,9 @@ namespace Journal_Entry_Automation
             sw.WriteLine("  <JRNL_LN_IMP>");
             sw.WriteLine("    <JOURNAL_LINE>1</JOURNAL_LINE>");
             sw.WriteLine("    <BUSINESS_UNIT>STATE</BUSINESS_UNIT>");
-            sw.WriteLine("    <LEDGER>" + Entry.Line.ledger + "</LEDGER");
+            sw.WriteLine("    <LEDGER>" + Entry.Line.ledger + "</LEDGER>");
             sw.WriteLine("    <ACCOUNT>" + Entry.Line.account + "</ACCOUNT>");
-            sw.WriteLine("    <FUND_CODE>" + Entry.Line.fund + "</FUNDCODE>");
+            sw.WriteLine("    <FUND_CODE>" + Entry.Line.fund + "</FUND_CODE>");
             sw.WriteLine("    <PRODUCT>" + Entry.Line.ALI + "</PRODUCT>");
             sw.WriteLine("    <DEPTID>" + Entry.Line.dept + "</DEPTID>");
             sw.WriteLine("    <PROGRAM_CODE>" + Entry.Line.prog + "</PROGRAM_CODE>");
@@ -218,6 +223,8 @@ namespace Journal_Entry_Automation
             
             sw.WriteLine("    <FORIEGN_AMOUNT>" + Entry.Line.amount + "</FOREIGN_AMOUNT>");
             sw.WriteLine("    <LINE_DESCR>" + Entry.Line.desc + "</LINE_DESCR>");
+            sw.WriteLine("  </JRNL_LN_IMP>");
+            sw.WriteLine("</JRNL_HDR_IMP>");
         }
 
 
