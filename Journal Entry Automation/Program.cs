@@ -59,20 +59,19 @@ namespace Journal_Entry_Automation
 
     class JournalEntries
     {
-        const string outFileSting = "C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\TEST.txt";
         static void Main(string[] args)
         {
             try
             {
                 StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST_OUT.txt");
-                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST.txt");
+                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_HARD_TEST_IN.txt");
 
                 Entry Entry = new Entry();
 
-                while (sr.Peek() != -1)
-                {
+                //while (sr.Peek() != -1)
+                //{
                     processInformation(sr, sw, ref Entry);
-                }
+                //}
 
                 //Close the file
                 sw.Close();
@@ -101,69 +100,29 @@ namespace Journal_Entry_Automation
 
         static void processInformation(StreamReader sr, StreamWriter sw, ref Entry Entry)
         {
-            parseInformation(sr, ref Entry);
-            printFile(sw, Entry);
+            parseHeader(sr, ref Entry);
+
+            //Consume line headers
+            sr.ReadLine();
+            //Parse first line so header can be printed
+            parseLine(sr, ref Entry);
+
+            //Print header and first line
+            printHeader(sw, Entry);
+            printLine(sw, Entry);
+            
+            //parse and print any following lines
+            while (!string.IsNullOrWhiteSpace(sr.ReadLine()))
+            {
+               parseLine(sr, ref Entry);
+               printLine(sw, Entry);
+            }
+            sw.WriteLine("</JRNL_HDR_IMP>");
+
         }
 
-        static void parseInformation(StreamReader sr, ref Entry Entry)
+        static void printHeader(StreamWriter sw, Entry Entry)
         {
-            Dictionary<string, string> ledgerGroups = new Dictionary<string, string>();
-            buildDictionary(ledgerGroups);
-
-            //Discards first Journal Entires Line
-            sr.ReadLine();
-
-            //Read first line and trim all information except for Journal ID
-            string journalID = sr.ReadLine();
-            journalID = journalID[12..];
-            journalID = journalID.Trim();
-            Entry.Head.journalID = journalID;
-
-            //Read second line and trim all information except for Journal Date/Desc
-            string journalDateAndDesc = sr.ReadLine();
-            string journalDate = journalDateAndDesc.Substring(14, 10);
-            journalDate = DateTime.ParseExact(journalDate, "MM/dd/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
-            string journalDesc = journalDateAndDesc[26..];
-            Entry.Head.journalDate = journalDate;
-            journalDesc = journalDesc.Trim();
-            //URL Encoding to conform to excel
-            journalDesc = Uri.EscapeDataString(journalDesc);
-            Entry.Head.desc = journalDesc;
-
-            //Discard header titles
-            sr.ReadLine();
-
-            string line = sr.ReadLine();
-            string[] lineVals = line.Split();
-
-            //Get all line values
-            //TODO: there has to be a better way to do 
-            Entry.Line.unit = lineVals[0];
-            Entry.Head.ledger = lineVals[1];
-            Entry.Head.ledgerGroup = ledgerGroups[lineVals[1]];
-            Entry.Line.ledger = lineVals[1];
-            Entry.Line.account = lineVals[2];
-            Entry.Line.fund = lineVals[3];
-            Entry.Line.ALI = lineVals[4];
-            Entry.Line.dept = lineVals[5];
-            Entry.Line.prog = lineVals[6];
-            Entry.Line.grtPrj = lineVals[7];
-            Entry.Line.proj = lineVals[8];
-            Entry.Line.servLoc = lineVals[9];
-            Entry.Line.reporting = lineVals[10];
-            Entry.Line.agency = lineVals[11];
-            Entry.Line.ISTVXRef = lineVals[12];
-            Entry.Line.budRef = lineVals[13];
-            //Round amount to two decimal places
-            double amountFloat = float.Parse(lineVals[14]);
-            amountFloat = Math.Round(amountFloat, 2);
-            Entry.Line.amount = amountFloat.ToString();
-            Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
-        }
-
-        static void printFile(StreamWriter sw, Entry Entry)
-        {
-            //HEADER
             sw.WriteLine("<JRNL_HDR_IMP>");
             sw.WriteLine("  <SEQNO>1715</SEQNO>");
             sw.WriteLine("  <BUSINESS_UNIT>STATE</BUSINESS_UNIT>");
@@ -179,7 +138,10 @@ namespace Journal_Entry_Automation
             sw.WriteLine("  <REVERSAL_CD>N</REVERSAL_CD>");
             sw.WriteLine("  <AUTO_GEN_LINES>N</AUTO_GEN_LINES>");
             sw.WriteLine("  <ADJUSTING_ENTRY>N</ADJUSTING_ENTRY>");
-            //LINE
+        }
+
+        static void printLine(StreamWriter sw, Entry Entry)
+        {
             sw.WriteLine("  <JRNL_LN_IMP>");
             sw.WriteLine("    <JOURNAL_LINE>1</JOURNAL_LINE>");
             sw.WriteLine("    <BUSINESS_UNIT>STATE</BUSINESS_UNIT>");
@@ -224,13 +186,71 @@ namespace Journal_Entry_Automation
             {
                 sw.WriteLine("    <BUDGET_REF>" + Entry.Line.budRef + "</BUDGET_REF>");
             }
-            
+
             sw.WriteLine("    <FORIEGN_AMOUNT>" + Entry.Line.amount + "</FOREIGN_AMOUNT>");
             sw.WriteLine("    <LINE_DESCR>" + Entry.Line.desc + "</LINE_DESCR>");
             sw.WriteLine("  </JRNL_LN_IMP>");
-            sw.WriteLine("</JRNL_HDR_IMP>");
         }
 
+        static void parseHeader(StreamReader sr, ref Entry Entry)
+        {
+            Dictionary<string, string> ledgerGroups = new Dictionary<string, string>();
+            buildDictionary(ledgerGroups);
 
-    }
+            //Discards first Journal Entires Line
+            //sr.ReadLine();
+
+            //Read first line and trim all information except for Journal ID
+            string journalID = sr.ReadLine();
+            journalID = journalID[12..];
+            journalID = journalID.Trim();
+            Entry.Head.journalID = journalID;
+
+            //Read second line and trim all information except for Journal Date/Desc
+            string journalDateAndDesc = sr.ReadLine();
+            string journalDate = journalDateAndDesc.Substring(14, 10);
+            journalDate = DateTime.ParseExact(journalDate.Trim(), "M/dd/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
+            string journalDesc = journalDateAndDesc[26..];
+            Entry.Head.journalDate = journalDate;
+            journalDesc = journalDesc.Trim();
+            //URL Encoding to conform to excel
+            journalDesc = Uri.EscapeDataString(journalDesc);
+            Entry.Head.desc = journalDesc;
+        }
+
+        static void parseLine(StreamReader sr, ref Entry Entry)
+        {
+            Dictionary<string, string> ledgerGroups = new Dictionary<string, string>();
+            buildDictionary(ledgerGroups);
+
+            string line = sr.ReadLine();
+            string[] lineVals = line.Split();
+
+            //Get all line values
+            //TODO: there has to be a better way to do 
+            Entry.Line.unit = lineVals[0];
+            Entry.Head.ledger = lineVals[1];
+            Entry.Head.ledgerGroup = ledgerGroups[lineVals[1]];
+            Entry.Line.ledger = lineVals[1];
+            Entry.Line.account = lineVals[2];
+            Entry.Line.fund = lineVals[3];
+            Entry.Line.ALI = lineVals[4];
+            Entry.Line.dept = lineVals[5];
+            Entry.Line.prog = lineVals[6];
+            Entry.Line.grtPrj = lineVals[7];
+            Entry.Line.proj = lineVals[8];
+            Entry.Line.servLoc = lineVals[9];
+            Entry.Line.reporting = lineVals[10];
+            Entry.Line.agency = lineVals[11];
+            Entry.Line.ISTVXRef = lineVals[12];
+            Entry.Line.budRef = lineVals[13];
+            //Round amount to two decimal places
+            double amountFloat = float.Parse(lineVals[14]);
+            amountFloat = Math.Round(amountFloat, 2);
+            Entry.Line.amount = amountFloat.ToString();
+            Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
+        }
+ 
+        }
+
 }
