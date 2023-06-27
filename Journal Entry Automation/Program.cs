@@ -71,8 +71,7 @@ namespace Journal_Entry_Automation
 
                 while (sr.Peek() != -1)
                 {
-                    parseInformation(sr, ref Entry);
-                    printFile(sw, Entry);
+                    processInformation(sr, sw, ref Entry);
                 }
 
                 //Close the file
@@ -98,6 +97,12 @@ namespace Journal_Entry_Automation
             dictionary.Add("CC_ACT_ENC", "CC_AGY_CTL");
             dictionary.Add("CC_CSH_EXP", "CC_CASH");
             dictionary.Add("CC_GR1_ENC", "CC_GRNT1");
+        }
+
+        static void processInformation(StreamReader sr, StreamWriter sw, ref Entry Entry)
+        {
+            parseInformation(sr, ref Entry);
+            printFile(sw, Entry);
         }
 
         static void parseInformation(StreamReader sr, ref Entry Entry)
@@ -154,9 +159,6 @@ namespace Journal_Entry_Automation
             amountFloat = Math.Round(amountFloat, 2);
             Entry.Line.amount = amountFloat.ToString();
             Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
-
-            //Consume whitespace line before next entry
-            sr.ReadLine();
         }
 
         static void printFile(StreamWriter sw, Entry Entry)
