@@ -68,10 +68,10 @@ namespace Journal_Entry_Automation
 
                 Entry Entry = new Entry();
 
-                //while (sr.Peek() != -1)
-                //{
+                while (sr.Peek() != -1)
+               {
                     processInformation(sr, sw, ref Entry);
-                //}
+               }
 
                 //Close the file
                 sw.Close();
@@ -110,12 +110,13 @@ namespace Journal_Entry_Automation
             //Print header and first line
             printHeader(sw, Entry);
             printLine(sw, Entry);
-            
+
             //parse and print any following lines
-            while (!string.IsNullOrWhiteSpace(sr.ReadLine()))
+            while (sr.Peek() == 'S')
             {
-               parseLine(sr, ref Entry);
-               printLine(sw, Entry);
+                Console.WriteLine("HERE");
+                parseLine(sr, ref Entry);
+                printLine(sw, Entry);
             }
             sw.WriteLine("</JRNL_HDR_IMP>");
 
@@ -197,7 +198,7 @@ namespace Journal_Entry_Automation
             Dictionary<string, string> ledgerGroups = new Dictionary<string, string>();
             buildDictionary(ledgerGroups);
 
-            //Discards first Journal Entires Line
+            //DISCARDS FIRST JOURNAL ENTRY LINE
             //sr.ReadLine();
 
             //Read first line and trim all information except for Journal ID
