@@ -5,4 +5,4 @@ The goal of this project was to automate a task I was given every week at my sum
 This program was just run through visual studio using the command line because I was the only one using it. The code for the progrma can be found [here](Journal Entry Automation/Program.cs)
 
 ## Example input and output
-The examples [input](SampleIO/CCOAKS51,53.txt) and output [SampleIO/CCOAK11578_87.txt) must be formatted as seen in these files.
+The examples [input](SampleIO/CCOAKS51,53.txt) and [output](SampleIO/CCOAK11578_87.txt) must be formatted as seen in these files.
