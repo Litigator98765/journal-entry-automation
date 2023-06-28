@@ -116,9 +116,8 @@ namespace Journal_Entry_Automation
             while (sr.Peek() == 'S')
             {
                 lineNum++;
-                Entry.Line.journalLine = lineNum;
-                Console.WriteLine("HERE");
                 parseLine(sr, ref Entry);
+                Entry.Line.journalLine = lineNum;
                 printLine(sw, Entry);
             }
             sw.WriteLine("</JRNL_HDR_IMP>");
@@ -259,6 +258,6 @@ namespace Journal_Entry_Automation
             Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
         }
  
-        }
+    }
 
 }
