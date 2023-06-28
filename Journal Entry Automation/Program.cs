@@ -31,7 +31,7 @@ namespace Journal_Entry_Automation
 
     struct Line
     {
-        int journalLine;
+        public int journalLine;
         public string unit;
         public string ledger;
         public string account;
@@ -112,8 +112,11 @@ namespace Journal_Entry_Automation
             printLine(sw, Entry);
 
             //parse and print any following lines
+            int lineNum = 1;
             while (sr.Peek() == 'S')
             {
+                lineNum++;
+                Entry.Line.journalLine = lineNum;
                 Console.WriteLine("HERE");
                 parseLine(sr, ref Entry);
                 printLine(sw, Entry);
@@ -143,8 +146,9 @@ namespace Journal_Entry_Automation
 
         static void printLine(StreamWriter sw, Entry Entry)
         {
+            //REQUIRED LINE FIELDS
             sw.WriteLine("  <JRNL_LN_IMP>");
-            sw.WriteLine("    <JOURNAL_LINE>1</JOURNAL_LINE>");
+            sw.WriteLine("    <JOURNAL_LINE>" + Entry.Line.journalLine + "</JOURNAL_LINE>");
             sw.WriteLine("    <BUSINESS_UNIT>STATE</BUSINESS_UNIT>");
             sw.WriteLine("    <LEDGER>" + Entry.Line.ledger + "</LEDGER>");
             sw.WriteLine("    <ACCOUNT>" + Entry.Line.account + "</ACCOUNT>");
@@ -153,6 +157,7 @@ namespace Journal_Entry_Automation
             sw.WriteLine("    <DEPTID>" + Entry.Line.dept + "</DEPTID>");
             sw.WriteLine("    <PROGRAM_CODE>" + Entry.Line.prog + "</PROGRAM_CODE>");
 
+            //OPTIONAL FIELDS
             if (Entry.Line.grtPrj != "")
             {
                 sw.WriteLine("    <PROJECT_ID>" + Entry.Line.grtPrj + "</PROJECT_ID>");
@@ -199,7 +204,8 @@ namespace Journal_Entry_Automation
             buildDictionary(ledgerGroups);
 
             //DISCARDS FIRST JOURNAL ENTRY LINE
-            //sr.ReadLine();
+            //CAN CAUSE PROBLEMS, TXT FILE MUST BEGIN WITH JOURNAL ENTRIES: AND HAVE ONE LINE BETWEEN ENTRIES
+            sr.ReadLine();
 
             //Read first line and trim all information except for Journal ID
             string journalID = sr.ReadLine();
@@ -229,6 +235,7 @@ namespace Journal_Entry_Automation
 
             //Get all line values
             //TODO: there has to be a better way to do 
+            Entry.Line.journalLine = 1;
             Entry.Line.unit = lineVals[0];
             Entry.Head.ledger = lineVals[1];
             Entry.Head.ledgerGroup = ledgerGroups[lineVals[1]];
