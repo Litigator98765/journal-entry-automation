@@ -1,13 +1,11 @@
-using System;
-using System.IO;
-using System.Reflection.PortableExecutable;
-using System.Runtime.ConstrainedExecution;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Collections.Generic;
-using System.Linq;
-using System.Transactions;
-using System.Security.Cryptography.X509Certificates;
 using System.Globalization;
+
+/*
+ * Upload with "Journal Entries" as first line, followed by journal entries with one line in between each.
+ * 
+ * Supports single line journal entries, multiple  line journal entries should work but could have bugs.
+ * 
+ */
 
 namespace Journal_Entry_Automation
 {
@@ -63,8 +61,8 @@ namespace Journal_Entry_Automation
         {
             try
             {
-                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_TEST_OUT.txt");
-                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\CCOAKS_HARD_TEST_IN.txt");
+                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Completed Journals\\CCOAKS_TEST_OUT.txt");
+                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Completed Journals\\CCOAKS_HARD_TEST_IN.txt");
 
                 Entry Entry = new Entry();
 
@@ -96,6 +94,7 @@ namespace Journal_Entry_Automation
             dictionary.Add("CC_ACT_ENC", "CC_AGY_CTL");
             dictionary.Add("CC_CSH_EXP", "CC_CASH");
             dictionary.Add("CC_GR1_ENC", "CC_GRNT1");
+            dictionary.Add("CC_ATR_ENC", "CC_AGY_TRK");
         }
 
         static void processInformation(StreamReader sr, StreamWriter sw, ref Entry Entry)
