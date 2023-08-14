@@ -61,15 +61,16 @@ namespace Journal_Entry_Automation
         {
             try
             {
-                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Completed Journals\\CCOAKS_TEST_OUT.txt");
-                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Completed Journals\\CCOAKS_HARD_TEST_IN.txt");
+                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Journals\\OOOOUT.txt");
+                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Journals\\Trouble.txt");
 
                 Entry Entry = new Entry();
 
+
                 while (sr.Peek() != -1)
-               {
+                {
                     processInformation(sr, sw, ref Entry);
-               }
+                }
 
                 //Close the file
                 sw.Close();
@@ -78,6 +79,7 @@ namespace Journal_Entry_Automation
             catch (Exception e)
             {
                 Console.WriteLine("Exception: " + e.Message);
+                Console.WriteLine(e.ToString());
             }
             finally
             {
@@ -95,6 +97,12 @@ namespace Journal_Entry_Automation
             dictionary.Add("CC_CSH_EXP", "CC_CASH");
             dictionary.Add("CC_GR1_ENC", "CC_GRNT1");
             dictionary.Add("CC_ATR_ENC", "CC_AGY_TRK");
+
+            dictionary.Add("CC_APR_EXP", "CC_APPROP");
+            dictionary.Add("CC_ALT_EXP", "CC_ALLOT");
+            dictionary.Add("CC_ATR_EXP", "CC_AGY_TRK");
+            dictionary.Add("CC_PLN_EXP", "CC_PLAN");
+            dictionary.Add("CC_DET_EXP", "CC_DETAIL");
         }
 
         static void processInformation(StreamReader sr, StreamWriter sw, ref Entry Entry)
@@ -153,7 +161,12 @@ namespace Journal_Entry_Automation
             sw.WriteLine("    <FUND_CODE>" + Entry.Line.fund + "</FUND_CODE>");
             sw.WriteLine("    <PRODUCT>" + Entry.Line.ALI + "</PRODUCT>");
             sw.WriteLine("    <DEPTID>" + Entry.Line.dept + "</DEPTID>");
-            sw.WriteLine("    <PROGRAM_CODE>" + Entry.Line.prog + "</PROGRAM_CODE>");
+
+            if (Entry.Line.prog != "") 
+            { 
+                sw.WriteLine("    <PROGRAM_CODE>" + Entry.Line.prog + "</PROGRAM_CODE>"); 
+            }
+            
 
             //OPTIONAL FIELDS
             if (Entry.Line.grtPrj != "")
@@ -214,7 +227,7 @@ namespace Journal_Entry_Automation
             //Read second line and trim all information except for Journal Date/Desc
             string journalDateAndDesc = sr.ReadLine();
             string journalDate = journalDateAndDesc.Substring(14, 10);
-            journalDate = DateTime.ParseExact(journalDate.Trim(), "M/dd/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
+            journalDate = DateTime.ParseExact(journalDate.Trim(), "M/d/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
             string journalDesc = journalDateAndDesc[26..];
             Entry.Head.journalDate = journalDate;
             journalDesc = journalDesc.Trim();
@@ -230,6 +243,7 @@ namespace Journal_Entry_Automation
 
             string line = sr.ReadLine();
             string[] lineVals = line.Split();
+
 
             //Get all line values
             //TODO: there has to be a better way to do 
@@ -250,13 +264,15 @@ namespace Journal_Entry_Automation
             Entry.Line.agency = lineVals[11];
             Entry.Line.ISTVXRef = lineVals[12];
             Entry.Line.budRef = lineVals[13];
-            //Round amount to two decimal places
+
+
             double amountFloat = float.Parse(lineVals[14]);
             amountFloat = Math.Round(amountFloat, 2);
             Entry.Line.amount = amountFloat.ToString();
+            
             Entry.Line.desc = Uri.EscapeDataString(lineVals[15]);
         }
- 
+
     }
 
 }
