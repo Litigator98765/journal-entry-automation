@@ -61,8 +61,8 @@ namespace Journal_Entry_Automation
         {
             try
             {
-                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Journals\\OOOOUT.txt");
-                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Journals\\Trouble.txt");
+                StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Journals\\Output.txt");
+                StreamReader sr = new StreamReader("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Journals\\Input.txt");
 
                 Entry Entry = new Entry();
 
