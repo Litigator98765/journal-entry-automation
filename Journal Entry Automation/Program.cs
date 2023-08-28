@@ -57,8 +57,10 @@ namespace Journal_Entry_Automation
 
     class JournalEntries
     {
+
         static void Main(string[] args)
         {
+            int numEntries = 0;
             try
             {
                 StreamWriter sw = new StreamWriter("C:\\Users\\10213984\\OneDrive - State of Ohio\\Documents\\Journals\\Output.txt");
@@ -70,6 +72,7 @@ namespace Journal_Entry_Automation
                 while (sr.Peek() != -1)
                 {
                     processInformation(sr, sw, ref Entry);
+                    numEntries++;
                 }
 
                 //Close the file
@@ -83,7 +86,7 @@ namespace Journal_Entry_Automation
             }
             finally
             {
-                Console.WriteLine("Exiting program");
+                Console.WriteLine(numEntries + " entries succesfully completed.");
             }
         }
 
@@ -103,6 +106,9 @@ namespace Journal_Entry_Automation
             dictionary.Add("CC_ATR_EXP", "CC_AGY_TRK");
             dictionary.Add("CC_PLN_EXP", "CC_PLAN");
             dictionary.Add("CC_DET_EXP", "CC_DETAIL");
+
+            dictionary.Add("CC_DET_EMC", "CC_DETAIL");
+
         }
 
         static void processInformation(StreamReader sr, StreamWriter sw, ref Entry Entry)
@@ -204,7 +210,7 @@ namespace Journal_Entry_Automation
                 sw.WriteLine("    <BUDGET_REF>" + Entry.Line.budRef + "</BUDGET_REF>");
             }
 
-            sw.WriteLine("    <FORIEGN_AMOUNT>" + Entry.Line.amount + "</FOREIGN_AMOUNT>");
+            sw.WriteLine("    <FOREIGN_AMOUNT>" + Entry.Line.amount + "</FOREIGN_AMOUNT>");
             sw.WriteLine("    <LINE_DESCR>" + Entry.Line.desc + "</LINE_DESCR>");
             sw.WriteLine("  </JRNL_LN_IMP>");
         }
@@ -220,20 +226,23 @@ namespace Journal_Entry_Automation
 
             //Read first line and trim all information except for Journal ID
             string journalID = sr.ReadLine();
-            journalID = journalID[12..];
+            journalID = journalID[11..];
             journalID = journalID.Trim();
             Entry.Head.journalID = journalID;
 
             //Read second line and trim all information except for Journal Date/Desc
             string journalDateAndDesc = sr.ReadLine();
-            string journalDate = journalDateAndDesc.Substring(14, 10);
+            string[] dateAndDescArray = journalDateAndDesc.Split();
+            string journalDate = dateAndDescArray[2];
             journalDate = DateTime.ParseExact(journalDate.Trim(), "M/d/yyyy", CultureInfo.InvariantCulture).ToString("yyyyMMdd");
-            string journalDesc = journalDateAndDesc[26..];
             Entry.Head.journalDate = journalDate;
+            string journalDesc = journalDateAndDesc[23..];
             journalDesc = journalDesc.Trim();
             //URL Encoding to conform to excel
             journalDesc = Uri.EscapeDataString(journalDesc);
             Entry.Head.desc = journalDesc;
+
+            Console.WriteLine(journalDesc);
         }
 
         static void parseLine(StreamReader sr, ref Entry Entry)
